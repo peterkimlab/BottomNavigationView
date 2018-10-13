@@ -1,80 +1,86 @@
 package com.test.english.ui.main;
 
+import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
 import com.exam.english.R;
 import com.exam.english.databinding.ActivityMainBinding;
+import com.test.english.ui.adapter.MainViewPagerAdapter;
 import com.test.english.ui.frag1.Fragment1;
 import com.test.english.ui.frag2.Fragment2;
 import com.test.english.ui.frag3.Fragment3;
 import com.test.english.ui.frag4.Fragment4;
 import com.test.english.ui.helper.BottomNavigationNotShiftHelper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
-    private ActivityMainBinding mainBinding;
-    private FragmentTransaction transaction = null;
-    private Fragment fragment;
-    private Fragment1 fragment1;
-    private Fragment2 fragment2;
-    private Fragment3 fragment3;
-    private Fragment4 fragment4;
+    private ActivityMainBinding binding;
+    private MainViewPagerAdapter mainViewPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        fragment1 = Fragment1.newInstance();
-        fragment2 = Fragment2.newInstance();
-        fragment3 = Fragment3.newInstance();
-        fragment4 = Fragment4.newInstance();
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        fragment = fragment1;
-        changeFragment();
+        BottomNavigationNotShiftHelper.disableShiftMode(binding.bottomNavigation);
+        setupViewPager(binding.mainViewPager);
 
-        mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        BottomNavigationNotShiftHelper.disableShiftMode(mainBinding.bottomNavigation);
-
-        mainBinding.bottomNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        binding.bottomNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.frag1:
-                        fragment = fragment1;
-                        changeFragment();
+                        binding.mainViewPager.setCurrentItem(0);
                         return true;
                     case R.id.frag2:
-                        fragment = fragment2;
-                        changeFragment();
+                        binding.mainViewPager.setCurrentItem(1);
                         return true;
                     case R.id.frag3:
-                        fragment = fragment3;
-                        changeFragment();
+                        binding.mainViewPager.setCurrentItem(2);
                         return true;
                     case R.id.frag4:
-                        fragment = fragment4;
-                        changeFragment();
+                        binding.mainViewPager.setCurrentItem(3);
                         return true;
                 }
                 return false;
             }
         });
+
+        binding.mainViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+            @Override
+            public void onPageSelected(int position) {
+                binding.bottomNavigation.getMenu().getItem(position).setChecked(true);
+            }
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
-    private void changeFragment() {
-        transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.flContainerHome, fragment);
-        transaction.commit();
+    public void setupViewPager(ViewPager viewPager) {
+        mainViewPagerAdapter = new MainViewPagerAdapter(getFragmentManager());
+
+        mainViewPagerAdapter.addFragment(Fragment1.newInstance());
+        mainViewPagerAdapter.addFragment(Fragment2.newInstance());
+        mainViewPagerAdapter.addFragment(Fragment3.newInstance());
+        mainViewPagerAdapter.addFragment(Fragment4.newInstance());
+
+        binding.mainViewPager.setAdapter(mainViewPagerAdapter);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
     }
+
 }
